@@ -54,10 +54,19 @@ eventus/
 
 ## Como rodar localmente
 
+### Programas necessários para testar o app
+
+- Node.js
+- npm
+- MySQL Server
+- MySQL Workbench ou outro cliente SQL
+- um navegador atualizado
+
 ### Pré-requisitos
 
 - Node.js instalado
 - MySQL em execução
+- banco `eventus` criado a partir do script `server/schema.sql`
 
 ### 1. Instalar dependências
 
@@ -100,7 +109,12 @@ Esse script cria:
 - `registrations`
 - `password_reset_codes`
 
-e também insere dados iniciais para teste.
+e também insere dados iniciais para teste com:
+
+- 1 usuário administrador
+- 1 participante administrador
+- 1 evento inicial
+- 0 inscrições
 
 ## 4. Rodar backend
 

@@ -46,22 +46,21 @@ CREATE TABLE registrations (
   CONSTRAINT uniq_registration UNIQUE (participant_id, event_id)
 );
 
-INSERT INTO accounts (name, email, password, phone, access_level, professor_request_pending) VALUES
-  ('Administrador Eventus', 'admin@eventus.local', 'admin123', '', 'Administrador', 0),
-  ('Ana Martins', 'ana.martins@fatec.sp.gov.br', '123456', '(11) 99999-1000', 'Professor', 0),
-  ('Bruno Costa', 'bruno@example.com', '123456', '(11) 99999-2000', 'Estudante', 0),
-  ('Alice Silva', 'alice@example.com', '123456', '(11) 99999-3000', 'Estudante', 0);
+CREATE TABLE password_reset_codes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  account_id INT NOT NULL,
+  code VARCHAR(10) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  used_at DATETIME NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_password_reset_codes_account FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE
+);
 
-INSERT INTO participants (account_id, name, email, phone, access_level) VALUES
-  (1, 'Administrador Eventus', 'admin@eventus.local', '', 'Administrador'),
-  (2, 'Ana Martins', 'ana.martins@fatec.sp.gov.br', '(11) 99999-1000', 'Professor'),
-  (3, 'Bruno Costa', 'bruno@example.com', '(11) 99999-2000', 'Estudante'),
-  (4, 'Alice Silva', 'alice@example.com', '(11) 99999-3000', 'Estudante');
+INSERT INTO accounts (id, name, email, password, phone, access_level, professor_request_pending) VALUES
+(1, 'Administrador Eventus', 'admin@eventus.local', 'admin123', '', 'Administrador', 0);
 
-INSERT INTO events (name, date, time, location, description, presenter_id) VALUES
-  ('Simpósio de Inteligência Artificial', '2026-05-14', '09:00:00', 'Auditório Central', 'Evento voltado à apresentação de pesquisas e tendências em inteligência artificial.', 2),
-  ('Workshop de Escrita Acadêmica', '2026-06-09', '14:00:00', 'Sala 302', 'Oficina prática para desenvolvimento de artigos e trabalhos acadêmicos.', 2);
+INSERT INTO participants (id, account_id, name, email, phone, access_level) VALUES
+(1, 1, 'Administrador Eventus', 'admin@eventus.local', '', 'Administrador');
 
-INSERT INTO registrations (participant_id, event_id, registration_date) VALUES
-  (3, 1, '2026-04-01 10:00:00'),
-  (4, 1, '2026-04-02 11:30:00');
+INSERT INTO events (id, name, date, time, location, description, presenter_id) VALUES
+(1, 'Evento de Demonstracao Eventus', '2026-05-20', '19:00:00', 'Auditorio Principal', 'Evento inicial de demonstracao do sistema Eventus.', NULL);
