@@ -35,7 +35,7 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   requestResetCode: (payload: { email: string }) =>
-    request<{ message: string }>('/auth/request-reset-code', {
+    request<{ message: string; deliveryMode?: 'email' | 'local'; debugCode?: string }>('/auth/request-reset-code', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),

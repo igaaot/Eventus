@@ -16,7 +16,7 @@ Atualmente o sistema possui:
 - cadastro, edição e remoção de eventos
 - inscrições em eventos
 - dashboard com informações por perfil
-- recuperação de senha por código enviado por e-mail
+- recuperação de senha por código
 - identificação visual de eventos expirados
 
 ## Tecnologias utilizadas
@@ -36,20 +36,20 @@ Atualmente o sistema possui:
 
 ```text
 eventus/
-├── public/
-├── server/
-│   ├── db.ts
-│   ├── index.ts
-│   └── schema.sql
-├── src/
-│   ├── components/
-│   ├── hooks/
-│   ├── lib/
-│   ├── pages/
-│   └── types.ts
-├── .env.example
-├── package.json
-└── README.md
+|-- public/
+|-- server/
+|   |-- db.ts
+|   |-- index.ts
+|   `-- schema.sql
+|-- src/
+|   |-- components/
+|   |-- hooks/
+|   |-- lib/
+|   |-- pages/
+|   `-- types.ts
+|-- .env.example
+|-- package.json
+`-- README.md
 ```
 
 ## Como rodar localmente
@@ -60,7 +60,7 @@ eventus/
 - npm
 - MySQL Server
 - MySQL Workbench ou outro cliente SQL
-- um navegador atualizado
+- navegador atualizado
 
 ### Pré-requisitos
 
@@ -91,11 +91,11 @@ MYSQL_DATABASE="eventus"
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
 SMTP_USER="seuemail@gmail.com"
-SMTP_PASSWORD="sua_senha_de_app"
+SMTP_PASSWORD="SUA_SENHA_DE_APP"
 SMTP_FROM="Eventus <seuemail@gmail.com>"
 ```
 
-## 3. Criar a estrutura do banco
+### 3. Criar a estrutura do banco
 
 Execute o script:
 
@@ -109,26 +109,26 @@ Esse script cria:
 - `registrations`
 - `password_reset_codes`
 
-e também insere dados iniciais para teste com:
+Também insere dados iniciais para teste com:
 
 - 1 usuário administrador
 - 1 participante administrador
 - 1 evento inicial
 - 0 inscrições
 
-## 4. Rodar backend
+### 4. Rodar backend
 
 ```powershell
 & 'C:\Program Files\nodejs\npm.cmd' run dev:server
 ```
 
-## 5. Rodar frontend
+### 5. Rodar frontend
 
 ```powershell
 & 'C:\Program Files\nodejs\npm.cmd' run dev
 ```
 
-## 6. Acessar no navegador
+### 6. Acessar no navegador
 
 - Frontend: [http://localhost:3000](http://localhost:3000)
 - API: [http://localhost:3001/api](http://localhost:3001/api)
@@ -166,20 +166,21 @@ e também insere dados iniciais para teste com:
 - acompanha todas as inscrições
 - visualiza dashboard geral do sistema
 
-## Recuperação de senha por e-mail
+## Recuperação de senha
 
-O sistema possui recuperação de senha por código enviado por e-mail.
+O sistema possui recuperação de senha por código de validação.
 
 ### Como funciona
 
 1. o usuário informa o e-mail cadastrado na opção `Esqueceu a senha?`
 2. o backend gera um código temporário de recuperação
-3. esse código é enviado para o e-mail informado
-4. o usuário digita o código recebido
-5. o usuário define uma nova senha
-6. a senha é atualizada no banco de dados
+3. esse código é enviado por e-mail quando o SMTP está configurado
+4. em ambiente local sem SMTP configurado, o sistema exibe o código na própria tela para teste
+5. o usuário informa o código recebido
+6. após a validação, o sistema libera a definição da nova senha
+7. a senha é atualizada no banco de dados
 
-### O que precisa para funcionar
+### O que precisa para envio real por e-mail
 
 Para o envio real do e-mail, é necessário configurar:
 
@@ -189,12 +190,12 @@ Para o envio real do e-mail, é necessário configurar:
 - `SMTP_PASSWORD`
 - `SMTP_FROM`
 
-Essas credenciais definem **qual conta vai enviar os e-mails** do sistema.
+Essas credenciais definem qual conta vai enviar os e-mails do sistema.
 
 ### Importante
 
-- o e-mail configurado no `.env` é o **remetente**
-- o e-mail cadastrado no sistema é o **destinatário**
+- o e-mail configurado no `.env` é o remetente
+- o e-mail cadastrado no sistema é o destinatário
 - eles não precisam ser o mesmo
 
 Exemplo:
@@ -206,11 +207,11 @@ Quando `aluno@exemplo.com` solicitar recuperação de senha, o código será env
 
 ### Gmail
 
-Se estiver usando Gmail, utilize uma **senha de app**, e não a senha comum da conta.
+Se estiver usando Gmail, utilize uma senha de app, e não a senha comum da conta.
 
 ## Observações
 
-- sem configuração SMTP, o fluxo de recuperação de senha não enviará e-mail real
+- sem configuração SMTP, o fluxo de recuperação de senha continua funcionando em modo local de teste
 - os eventos com data já encerrada continuam visíveis para histórico, mas aparecem sinalizados como expirados
 - o projeto foi estruturado para futura publicação com frontend, backend e banco em serviços separados
 - nenhuma credencial real deve ser versionada no repositório

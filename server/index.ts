@@ -85,7 +85,7 @@ async function sendRecoveryCodeEmail(email: string, code: string) {
   const smtpConfig = getSmtpConfig();
 
   if (!smtpConfig) {
-    throw new Error('O envio de e-mail ainda nao foi configurado no servidor.');
+    throw new Error('O envio de e-mail ainda não foi configurado no servidor.');
   }
 
   const transporter = nodemailer.createTransport({
@@ -101,20 +101,24 @@ async function sendRecoveryCodeEmail(email: string, code: string) {
   await transporter.sendMail({
     from: smtpConfig.from,
     to: email,
-    subject: 'Codigo de recuperacao - Eventus',
-    text: `Seu codigo de recuperacao do Eventus e: ${code}\n\nEsse codigo expira em 15 minutos.`,
+    subject: 'Código de recuperação - Eventus',
+    text: `Seu código de recuperação do Eventus é: ${code}\n\nEsse código expira em 15 minutos.`,
     html: `
       <div style="font-family: Arial, sans-serif; color: #0f172a; line-height: 1.6;">
-        <h2 style="margin-bottom: 12px;">Recuperacao de acesso - Eventus</h2>
-        <p>Voce solicitou a redefinicao de senha da sua conta.</p>
-        <p>Use o codigo abaixo para continuar:</p>
+        <h2 style="margin-bottom: 12px;">Recuperação de acesso - Eventus</h2>
+        <p>Você solicitou a redefinição de senha da sua conta.</p>
+        <p>Use o código abaixo para continuar:</p>
         <div style="display:inline-block;padding:12px 18px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe;font-size:24px;font-weight:700;letter-spacing:4px;">
           ${code}
         </div>
-        <p style="margin-top:16px;">Esse codigo expira em 15 minutos.</p>
+        <p style="margin-top:16px;">Esse código expira em 15 minutos.</p>
       </div>
     `,
   });
+}
+
+function isProductionEnvironment() {
+  return process.env.NODE_ENV === 'production';
 }
 
 async function columnExists(tableName: string, columnName: string) {
@@ -543,7 +547,7 @@ app.post('/api/auth/request-reset-code', async (req, res) => {
     const account = (rows as { id: number }[])[0];
 
     if (!account) {
-      res.status(404).json({ message: 'Nao existe conta cadastrada com este e-mail.' });
+      res.status(404).json({ message: 'Não existe conta cadastrada com este e-mail.' });
       return;
     }
 
@@ -558,12 +562,30 @@ app.post('/api/auth/request-reset-code', async (req, res) => {
       [account.id, code]
     );
 
-    await sendRecoveryCodeEmail(normalizedEmail, code);
+    const smtpConfigured = Boolean(getSmtpConfig());
 
-    res.json({ message: 'Codigo de recuperacao enviado para o e-mail informado.' });
+    if (smtpConfigured) {
+      await sendRecoveryCodeEmail(normalizedEmail, code);
+      res.json({
+        message: 'Código de recuperação enviado para o e-mail informado.',
+        deliveryMode: 'email',
+      });
+      return;
+    }
+
+    if (isProductionEnvironment()) {
+      res.status(500).json({ message: 'O envio de e-mail não está configurado neste ambiente.' });
+      return;
+    }
+
+    res.json({
+      message: 'Código de recuperação gerado em modo local para teste.',
+      deliveryMode: 'local',
+      debugCode: code,
+    });
   } catch (error) {
     console.error('Request reset code error:', error);
-    res.status(500).json({ message: error instanceof Error ? error.message : 'Nao foi possivel enviar o codigo.' });
+    res.status(500).json({ message: error instanceof Error ? error.message : 'Não foi possível enviar o código.' });
   }
 });
 
@@ -571,7 +593,7 @@ app.post('/api/auth/confirm-reset-code', async (req, res) => {
   const { email, code, password } = req.body as { email?: string; code?: string; password?: string };
 
   if (!email || !code || !password) {
-    res.status(400).json({ message: 'E-mail, codigo e nova senha sao obrigatorios.' });
+    res.status(400).json({ message: 'E-mail, código e nova senha são obrigatórios.' });
     return;
   }
 
@@ -586,7 +608,7 @@ app.post('/api/auth/confirm-reset-code', async (req, res) => {
     const account = (accountRows as { id: number }[])[0];
 
     if (!account) {
-      res.status(404).json({ message: 'Nao existe conta cadastrada com este e-mail.' });
+      res.status(404).json({ message: 'Não existe conta cadastrada com este e-mail.' });
       return;
     }
 
@@ -606,23 +628,23 @@ app.post('/api/auth/confirm-reset-code', async (req, res) => {
     const resetCode = (codeRows as PasswordResetCodeRow[])[0];
 
     if (!resetCode) {
-      res.status(400).json({ message: 'Codigo de recuperacao invalido.' });
+      res.status(400).json({ message: 'Código de recuperação inválido.' });
       return;
     }
 
     if (new Date(resetCode.expiresAt).getTime() < Date.now()) {
       await pool.query('UPDATE password_reset_codes SET used_at = NOW() WHERE id = ?', [resetCode.id]);
-      res.status(400).json({ message: 'O codigo informado expirou. Solicite um novo codigo.' });
+      res.status(400).json({ message: 'O código informado expirou. Solicite um novo código.' });
       return;
     }
 
     await pool.query('UPDATE accounts SET password = ? WHERE id = ?', [password.trim(), account.id]);
     await pool.query('UPDATE password_reset_codes SET used_at = NOW() WHERE id = ?', [resetCode.id]);
 
-    res.json({ message: 'Senha atualizada com sucesso. Voce ja pode fazer login com a nova senha.' });
+    res.json({ message: 'Senha atualizada com sucesso. Você já pode fazer login com a nova senha.' });
   } catch (error) {
     console.error('Confirm reset code error:', error);
-    res.status(500).json({ message: 'Nao foi possivel atualizar a senha.' });
+    res.status(500).json({ message: 'Não foi possível atualizar a senha.' });
   }
 });
 

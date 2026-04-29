@@ -29,6 +29,8 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
   const [resetError, setResetError] = useState('');
   const [isResetSubmitting, setIsResetSubmitting] = useState(false);
   const [resetCodeSent, setResetCodeSent] = useState(false);
+  const [localResetCode, setLocalResetCode] = useState('');
+  const [isResetCodeValidated, setIsResetCodeValidated] = useState(false);
 
   const isLogin = mode === 'login';
 
@@ -60,7 +62,7 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
       if (submissionError instanceof Error) {
         setError(submissionError.message);
       } else {
-        setError('Nao foi possivel concluir a operacao.');
+        setError('Não foi possível concluir a operação.');
       }
     } finally {
       setIsSubmitting(false);
@@ -75,6 +77,8 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
     setResetMessage('');
     setResetError('');
     setResetCodeSent(false);
+    setLocalResetCode('');
+    setIsResetCodeValidated(false);
     setIsResetModalOpen(true);
   };
 
@@ -86,6 +90,8 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
     setResetMessage('');
     setResetError('');
     setResetCodeSent(false);
+    setLocalResetCode('');
+    setIsResetCodeValidated(false);
   };
 
   const handleResetPassword = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -102,9 +108,21 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
 
         setResetMessage(response.message);
         setResetCodeSent(true);
+        setLocalResetCode(response.deliveryMode === 'local' ? response.debugCode || '' : '');
       } else {
-        if (!resetCode.trim()) {
-          setResetError('Informe o codigo recebido por e-mail.');
+        if (!isResetCodeValidated) {
+          if (!resetCode.trim()) {
+            setResetError('Informe o código recebido por e-mail.');
+            return;
+          }
+
+          if (localResetCode && resetCode.trim() !== localResetCode.trim()) {
+            setResetError('O código informado não confere com o código gerado.');
+            return;
+          }
+
+          setResetMessage('Código validado. Agora defina sua nova senha.');
+          setIsResetCodeValidated(true);
           return;
         }
 
@@ -114,7 +132,7 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
         }
 
         if (resetPassword !== resetPasswordConfirm) {
-          setResetError('A confirmacao da senha nao confere.');
+          setResetError('A confirmação da senha não confere.');
           return;
         }
 
@@ -131,7 +149,7 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
       if (submissionError instanceof Error) {
         setResetError(submissionError.message);
       } else {
-        setResetError('Nao foi possivel concluir a recuperacao.');
+        setResetError('Não foi possível concluir a recuperação.');
       }
     } finally {
       setIsResetSubmitting(false);
@@ -162,15 +180,15 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
             <div className="mb-8 text-center lg:text-left">
               <div className="flex items-start justify-center gap-3 lg:justify-between">
                 <p className="text-xs font-semibold uppercase tracking-[0.26em] text-sky-700">Acesso ao sistema</p>
-                <InfoHint text="Nesta tela voce pode entrar com uma conta existente, realizar um novo cadastro ou redefinir a senha de acesso." />
+                <InfoHint text="Nesta tela você pode entrar com uma conta existente, realizar um novo cadastro ou redefinir a senha de acesso." />
               </div>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
                 {isLogin ? 'Entre na sua conta' : 'Crie sua conta no Eventus'}
               </h2>
               <p className="mt-3 text-base leading-7 text-slate-600">
                 {isLogin
-                  ? 'Acesse sua conta para entrar na plataforma e gerenciar suas informacoes.'
-                  : 'O cadastro comeca como estudante e pode evoluir de acordo com o uso da plataforma.'}
+                  ? 'Acesse sua conta para entrar na plataforma e gerenciar suas informações.'
+                  : 'O cadastro começa como estudante e pode evoluir de acordo com o uso da plataforma.'}
               </p>
             </div>
 
@@ -244,7 +262,7 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Minimo de 6 caracteres"
+                    placeholder="Mínimo de 6 caracteres"
                     className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400"
                   />
                 </div>
@@ -268,9 +286,9 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
             </form>
 
             <div className="mt-8 text-center text-base font-semibold text-slate-800">
-              {isLogin ? 'Nao tem uma conta?' : 'Ja tem uma conta?'}{' '}
+              {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}{' '}
               <button type="button" onClick={handleToggleMode} className="text-sky-700 underline underline-offset-4">
-                {isLogin ? 'Cadastre-se' : 'Faca login'}
+                {isLogin ? 'Cadastre-se' : 'Faça login'}
               </button>
             </div>
           </div>
@@ -281,13 +299,23 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
         <form onSubmit={handleResetPassword} className="space-y-4">
           <p className="text-sm leading-6 text-slate-600">
             {!resetCodeSent
-              ? 'Informe o e-mail da conta para receber um codigo de recuperacao.'
-              : 'Digite o codigo recebido por e-mail e defina sua nova senha.'}
+              ? 'Informe o e-mail da conta para receber um código de recuperação.'
+              : 'Digite o código recebido por e-mail e defina sua nova senha.'}
           </p>
 
           {resetMessage && (
             <div className="rounded-xl border border-lime-100 bg-lime-50 p-3 text-sm text-lime-700">
               {resetMessage}
+            </div>
+          )}
+
+          {localResetCode && (
+            <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
+              <p className="font-semibold">Modo local de teste</p>
+              <p className="mt-1">
+                Como o envio de e-mail não está configurado neste ambiente, use este código para continuar:
+              </p>
+              <p className="mt-2 text-base font-bold tracking-[0.25em] text-amber-900">{localResetCode}</p>
             </div>
           )}
 
@@ -312,42 +340,46 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
           {resetCodeSent && (
             <>
               <div>
-                <label className="mb-2 block text-sm font-bold text-slate-900">Codigo de recuperacao</label>
+                <label className="mb-2 block text-sm font-bold text-slate-900">Código de recuperação</label>
                 <input
                   required
                   type="text"
                   value={resetCode}
                   onChange={(event) => setResetCode(event.target.value)}
                   className="brand-input"
-                  placeholder="Digite o codigo de 6 digitos"
+                  placeholder="Digite o código de 6 dígitos"
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-900">Nova senha</label>
-                <input
-                  required
-                  minLength={6}
-                  type="password"
-                  value={resetPassword}
-                  onChange={(event) => setResetPassword(event.target.value)}
-                  className="brand-input"
-                  placeholder="Minimo de 6 caracteres"
-                />
-              </div>
+              {isResetCodeValidated && (
+                <>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-900">Nova senha</label>
+                    <input
+                      required
+                      minLength={6}
+                      type="password"
+                      value={resetPassword}
+                      onChange={(event) => setResetPassword(event.target.value)}
+                      className="brand-input"
+                      placeholder="Mínimo de 6 caracteres"
+                    />
+                  </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-900">Confirmar nova senha</label>
-                <input
-                  required
-                  minLength={6}
-                  type="password"
-                  value={resetPasswordConfirm}
-                  onChange={(event) => setResetPasswordConfirm(event.target.value)}
-                  className="brand-input"
-                  placeholder="Repita a nova senha"
-                />
-              </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-900">Confirmar nova senha</label>
+                    <input
+                      required
+                      minLength={6}
+                      type="password"
+                      value={resetPasswordConfirm}
+                      onChange={(event) => setResetPasswordConfirm(event.target.value)}
+                      className="brand-input"
+                      placeholder="Repita a nova senha"
+                    />
+                  </div>
+                </>
+              )}
             </>
           )}
 
@@ -356,7 +388,13 @@ export default function Auth({ onLogin, onRegister }: AuthProps) {
               Cancelar
             </button>
             <button type="submit" disabled={isResetSubmitting} className="brand-button flex-1 disabled:opacity-70">
-              {isResetSubmitting ? 'Processando...' : resetCodeSent ? 'Salvar nova senha' : 'Enviar codigo'}
+              {isResetSubmitting
+                ? 'Processando...'
+                : !resetCodeSent
+                  ? 'Enviar código'
+                  : !isResetCodeValidated
+                    ? 'Validar código'
+                    : 'Salvar nova senha'}
             </button>
           </div>
         </form>
