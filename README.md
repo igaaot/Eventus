@@ -78,6 +78,17 @@ npm install
 
 Crie um arquivo `.env` com base no `.env.example`.
 
+O arquivo `.env` deve ficar na raiz do projeto, no mesmo nível de `package.json`, `README.md` e `.env.example`.
+
+Estrutura esperada:
+
+- `eventus/.env`
+- `eventus/.env.example`
+
+O arquivo `.env.example` serve apenas como modelo. Para rodar o sistema, crie um arquivo `.env` real com os valores do seu ambiente local.
+
+Sempre que o `.env` for alterado, reinicie o backend para que as novas configurações sejam carregadas corretamente.
+
 Exemplo:
 
 ```env
