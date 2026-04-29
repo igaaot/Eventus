@@ -4,7 +4,7 @@ Sistema web para gestão de eventos acadêmicos, com autenticação por perfil, 
 
 ## Visão geral
 
-O Eventus foi desenvolvido como um projeto acadêmico para centralizar o controle de eventos, participantes e permissões de acesso em uma única plataforma.
+O Eventus foi desenvolvido para centralizar o controle de eventos, participantes e permissões de acesso em uma única plataforma.
 
 Atualmente o sistema possui:
 
@@ -98,6 +98,7 @@ Esse script cria:
 - `participants`
 - `events`
 - `registrations`
+- `password_reset_codes`
 
 e também insere dados iniciais para teste.
 
@@ -151,17 +152,45 @@ e também insere dados iniciais para teste.
 - acompanha todas as inscrições
 - visualiza dashboard geral do sistema
 
-## Recuperação de senha
+## Recuperação de senha por e-mail
 
 O sistema possui recuperação de senha por código enviado por e-mail.
 
-Para essa funcionalidade funcionar, é necessário configurar:
+### Como funciona
+
+1. o usuário informa o e-mail cadastrado na opção `Esqueceu a senha?`
+2. o backend gera um código temporário de recuperação
+3. esse código é enviado para o e-mail informado
+4. o usuário digita o código recebido
+5. o usuário define uma nova senha
+6. a senha é atualizada no banco de dados
+
+### O que precisa para funcionar
+
+Para o envio real do e-mail, é necessário configurar:
 
 - `SMTP_HOST`
 - `SMTP_PORT`
 - `SMTP_USER`
 - `SMTP_PASSWORD`
 - `SMTP_FROM`
+
+Essas credenciais definem **qual conta vai enviar os e-mails** do sistema.
+
+### Importante
+
+- o e-mail configurado no `.env` é o **remetente**
+- o e-mail cadastrado no sistema é o **destinatário**
+- eles não precisam ser o mesmo
+
+Exemplo:
+
+- remetente configurado no `.env`: `eventus.projeto@gmail.com`
+- usuário cadastrado na aplicação: `aluno@exemplo.com`
+
+Quando `aluno@exemplo.com` solicitar recuperação de senha, o código será enviado normalmente para esse endereço, desde que o SMTP esteja configurado corretamente.
+
+### Gmail
 
 Se estiver usando Gmail, utilize uma **senha de app**, e não a senha comum da conta.
 
@@ -170,6 +199,7 @@ Se estiver usando Gmail, utilize uma **senha de app**, e não a senha comum da c
 - sem configuração SMTP, o fluxo de recuperação de senha não enviará e-mail real
 - os eventos com data já encerrada continuam visíveis para histórico, mas aparecem sinalizados como expirados
 - o projeto foi estruturado para futura publicação com frontend, backend e banco em serviços separados
+- nenhuma credencial real deve ser versionada no repositório
 
 ## Scripts disponíveis
 
@@ -179,7 +209,3 @@ npm run dev:server
 npm run build
 npm run lint
 ```
-
-## Autor
-
-- Igor Nogueira Ferreira
