@@ -46,6 +46,7 @@ export default function App() {
     deleteEvent,
     addRegistration,
     deleteRegistration,
+    refreshData,
   } = useEventusData();
 
   const persistSession = (nextSessionUser: SessionUser | null) => {
@@ -62,11 +63,13 @@ export default function App() {
   const handleRegister = async (name: string, email: string, password: string, phone: string) => {
     const response = await api.register({ name, email, password, phone });
     persistSession(response.user);
+    await refreshData();
   };
 
   const handleLogin = async (email: string, password: string) => {
     const response = await api.login({ email, password });
     persistSession(response.user);
+    await refreshData();
   };
 
   const handleProfileUpdate = async (payload: { name: string; email: string; phone: string }) => {

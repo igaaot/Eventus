@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { AccessLevel, Event, Registration, SessionUser, UserProfile } from '../types';
 
@@ -7,32 +7,64 @@ export function useEventusData() {
   const [events, setEvents] = useState<Event[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [usersData, eventsData, registrationsData] = await Promise.all([
-          api.getUsers(),
-          api.getEvents(),
-          api.getRegistrations(),
-        ]);
+  const refreshData = useCallback(async () => {
+    try {
+      const [usersData, eventsData, registrationsData] = await Promise.all([
+        api.getUsers(),
+        api.getEvents(),
+        api.getRegistrations(),
+      ]);
 
-        setUsers(usersData);
-        setEvents(eventsData);
-        setRegistrations(registrationsData);
-      } catch (error) {
-        console.error('Erro ao carregar dados do Eventus:', error);
+      setUsers(usersData);
+      setEvents(eventsData);
+      setRegistrations(registrationsData);
+    } catch (error) {
+      console.error('Erro ao carregar dados do Eventus:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      refreshData();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshData();
       }
     };
 
-    loadData();
-  }, []);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [refreshData]);
+
+  const upsertUser = (updatedUser: UserProfile | SessionUser) => {
+    setUsers((prev) => {
+      const existingIndex = prev.findIndex((item) => item.id === updatedUser.id);
+
+      if (existingIndex === -1) {
+        return [...prev, updatedUser];
+      }
+
+      return prev.map((item) => (item.id === updatedUser.id ? updatedUser : item));
+    });
+  };
 
   const updateUser = async (
     id: string,
     payload: { name: string; email: string; phone: string; accessLevel: AccessLevel }
   ) => {
     const updatedUser = await api.updateUser(id, payload);
-    setUsers((prev) => prev.map((item) => (item.id === id ? updatedUser : item)));
+    upsertUser(updatedUser);
     setEvents((prev) =>
       prev.map((event) =>
         event.presenterId === updatedUser.participantId
@@ -67,7 +99,7 @@ export function useEventusData() {
     payload: { name: string; email: string; phone: string }
   ) => {
     const updatedUser = await api.updateProfile(id, payload);
-    setUsers((prev) => prev.map((item) => (item.id === id ? updatedUser : item)));
+    upsertUser(updatedUser);
     setEvents((prev) =>
       prev.map((event) =>
         event.presenterId === updatedUser.participantId && updatedUser.accessLevel === 'Professor'
@@ -80,7 +112,7 @@ export function useEventusData() {
 
   const requestProfessorAccess = async (id: string) => {
     const updatedUser = await api.requestProfessorAccess(id);
-    setUsers((prev) => prev.map((item) => (item.id === id ? updatedUser : item)));
+    upsertUser(updatedUser);
     return updatedUser;
   };
 
@@ -125,5 +157,6 @@ export function useEventusData() {
     deleteEvent,
     addRegistration,
     deleteRegistration,
+    refreshData,
   };
 }

@@ -2,6 +2,8 @@
 
 Sistema web para gestão de eventos acadêmicos, com autenticação por perfil, gerenciamento de usuários, eventos e inscrições, além de integração com backend em Node.js e banco MySQL.
 
+Versão atual da aplicação: `2.0`
+
 ## Visão geral
 
 O Eventus foi desenvolvido para centralizar o controle de eventos, participantes e permissões de acesso em uma única plataforma.
@@ -54,7 +56,7 @@ eventus/
 
 ## Como rodar localmente
 
-### Programas necessários para testar o app
+### Programas necessários
 
 - Node.js
 - npm
@@ -66,7 +68,7 @@ eventus/
 
 - Node.js instalado
 - MySQL em execução
-- banco `eventus` criado a partir do script `server/schema.sql`
+- acesso para criar o banco `eventus`
 
 ### 1. Instalar dependências
 
@@ -102,7 +104,7 @@ MYSQL_DATABASE="eventus"
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
 SMTP_USER="seuemail@gmail.com"
-SMTP_PASSWORD="SUA_SENHA_DE_APP"
+SMTP_PASSWORD="COLE_AQUI_SUA_SENHA_DE_APP"
 SMTP_FROM="Eventus <seuemail@gmail.com>"
 ```
 
@@ -127,16 +129,16 @@ Também insere dados iniciais para teste com:
 - 1 evento inicial
 - 0 inscrições
 
-### 4. Rodar backend
+### 4. Rodar o backend
 
 ```powershell
-& 'C:\Program Files\nodejs\npm.cmd' run dev:server
+npm run dev:server
 ```
 
-### 5. Rodar frontend
+### 5. Rodar o frontend
 
 ```powershell
-& 'C:\Program Files\nodejs\npm.cmd' run dev
+npm run dev
 ```
 
 ### 6. Acessar no navegador
@@ -146,8 +148,12 @@ Também insere dados iniciais para teste com:
 
 ## Usuário padrão para teste
 
+O banco inicial cria uma conta de demonstração para facilitar os testes locais:
+
 - E-mail: `admin@eventus.local`
 - Senha: `admin123`
+
+Essas credenciais existem apenas para ambiente local de desenvolvimento e demonstração.
 
 ## Perfis do sistema
 
@@ -234,4 +240,5 @@ npm run dev
 npm run dev:server
 npm run build
 npm run lint
+npm run clean
 ```

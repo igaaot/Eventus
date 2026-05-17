@@ -1,4 +1,3 @@
-DROP DATABASE IF EXISTS eventus;
 CREATE DATABASE eventus;
 USE eventus;
 
@@ -63,4 +62,4 @@ INSERT INTO participants (id, account_id, name, email, phone, access_level) VALU
 (1, 1, 'Administrador Eventus', 'admin@eventus.local', '', 'Administrador');
 
 INSERT INTO events (id, name, date, time, location, description, presenter_id) VALUES
-(1, 'Evento de DemonstraÃ§Ã£o Eventus', '2026-05-20', '19:00:00', 'AuditÃ³rio Principal', 'Evento inicial de demonstraÃ§Ã£o do sistema Eventus.', NULL);
+(1, 'Evento de Demonstração Eventus', '2026-05-20', '19:00:00', 'Auditório Principal', 'Evento inicial de demonstração do sistema Eventus.', NULL);

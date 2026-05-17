@@ -161,7 +161,7 @@ export default function Layout({
 
             <div className="hidden rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-2 shadow-sm md:block">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Versão atual</p>
-              <p className="text-sm font-bold text-slate-900">1.7.0</p>
+              <p className="text-sm font-bold text-slate-900">2.0</p>
             </div>
           </div>
         </header>
